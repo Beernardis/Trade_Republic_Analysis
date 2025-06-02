@@ -1,5 +1,3 @@
-// pdf-handler.js
-
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
 
 document.getElementById('fileInput').addEventListener('change', async (e) => {
@@ -67,10 +65,19 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
     creaTabella(dati);
 
     const posizioni = {};
+    const isinToNome = {};
+    const cashDividends = [];
 
+    // Primo passaggio: raccogli le posizioni
     dati.forEach(d => {
-      const isins = d.Descrizione.match(ISIN_REGEX);
-      if (isins) {
+      if (
+        d.Tipo === 'Commercio' &&
+        d.Descrizione.includes('quantity') &&
+        d.Descrizione.match(ISIN_REGEX)
+      ) {
+        const isins = d.Descrizione.match(ISIN_REGEX);
+        if (!isins) return;
+
         isins.forEach(isin => {
           if (!posizioni[isin]) posizioni[isin] = { totale: 0, descrizioni: [], nome: d.Descrizione };
 
@@ -91,7 +98,7 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
       }
     });
 
-    const isinToNome = {};
+    // Secondo passaggio: mappatura nomi ISIN
     Object.entries(posizioni).forEach(([isin, info]) => {
       const matchNome = info.nome.match(/(\w{12})(.*?),\s*quantity/);
       if (matchNome) {
@@ -99,28 +106,21 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
       }
     });
 
-    const cashDividends = [];
-
-    Object.entries(posizioni).forEach(([isin, info]) => {
-      const descrizioni = info.descrizioni || [];
-
-      const nonCashDividends = [];
-      const cashDividendsForThisIsin = [];
-
-      descrizioni.forEach(entry => {
-        if (entry.descrizione.startsWith("Cash Dividend")) {
-          cashDividendsForThisIsin.push({
+    // Terzo passaggio: raccogli i dividendi
+    dati.forEach(d => {
+      if (d.Descrizione.startsWith("Cash Dividend for ISIN")) {
+        const isin = (d.Descrizione.match(ISIN_REGEX) || [])[0];
+        if (isin) {
+          cashDividends.push({
             isin,
             nome: isinToNome[isin] || isin,
-            ...entry
+            data: d.Data,
+            descrizione: "Cash Dividend",
+            quantita: 0,
+            soldi: d.Movimentazione
           });
-        } else {
-          nonCashDividends.push(entry);
         }
-      });
-
-      posizioni[isin].descrizioni = nonCashDividends;
-      cashDividends.push(...cashDividendsForThisIsin);
+      }
     });
 
     mostraDividendi(cashDividends);
@@ -139,15 +139,15 @@ document.getElementById('fileInput').addEventListener('change', async (e) => {
         <div class="card-body">
           <h5 class="card-title">📌 ${nomeAzione}</h5>
 
-          <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
-            <div style="flex: 1 1 200px;"><strong>Quantità totale:</strong><br>${quantitaTotale.toFixed(6)}</div>
-            <div style="flex: 1 1 200px;"><strong>Soldi investiti:</strong><br>${totalInvestito.toFixed(2)} €</div>
-            <div style="flex: 1 1 200px;"><strong>Valore attuale:</strong><br><span id="valore-attuale-${isin}">—</span></div>
-            <div style="flex: 1 1 200px;"><strong>Variazione (€):</strong><br><span id="var-euro-${isin}">—</span></div>
-            <div style="flex: 1 1 200px;"><strong>Variazione (%):</strong><br><span id="var-percent-${isin}">—</span></div>
+          <div class="row mb-3">
+            <div class="col-md-4 col-sm-6 col-12"><strong>Quantità totale:</strong><br>${quantitaTotale.toFixed(6)}</div>
+            <div class="col-md-4 col-sm-6 col-12"><strong>Soldi investiti:</strong><br>${totalInvestito.toFixed(2)} €</div>
+            <div class="col-md-4 col-sm-6 col-12"><strong>Valore attuale:</strong><br><span id="valore-attuale-${isin}">—</span></div>
+            <div class="col-md-4 col-sm-6 col-12"><strong>Variazione (€):</strong><br><span id="var-euro-${isin}">—</span></div>
+            <div class="col-md-4 col-sm-6 col-12"><strong>Variazione (%):</strong><br><span id="var-percent-${isin}">—</span></div>
           </div>
 
-          <div style="overflow-x: auto;">
+          <div class="table-wrapper">
             <table class="table table-sm">
               <thead>
                 <tr>

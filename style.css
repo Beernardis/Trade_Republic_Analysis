@@ -10,19 +10,26 @@ table {
 th, td {
   text-align: left;
   padding: 0.5em;
+  vertical-align: middle;
+  word-break: break-word;
 }
 
 td, th {
-  white-space: nowrap;
-  padding: 0.75em 1em;
-  vertical-align: middle;
+  white-space: normal;
 }
+
 
 th:nth-child(3),
 td:nth-child(3) {
 white-space: normal;
 word-break: break-word;
 max-width: 400px;
+}
+
+th:nth-child(2),
+td:nth-child(2) {
+  min-width: 95px; /* aumenta lo spazio per Quantità */
+  text-align: right;
 }
 
 th:nth-child(4),
@@ -34,6 +41,7 @@ td:nth-child(6) {
   min-width: 110px;
   text-align: right;
 }
+
 
 th {
   background-color: #f5f5f5;
@@ -60,4 +68,18 @@ th {
 
 #tabella table {
   min-width: 800px;
+}
+
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.table-wrapper table {
+  min-width: 600px;
 }

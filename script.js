@@ -3,13 +3,16 @@ function creaInputPrezzo(isin, nome) {
   div.classList.add('row', 'align-items-center', 'py-2', 'mb-1', 'input-row');
 
   div.innerHTML = `
-    <div class="col-md-6 col-sm-12">
+    <div class="col-12 col-md-6 mb-1">
+
       <label for="price-${isin}" class="form-label mb-0"><strong>${nome}</strong></label>
     </div>
-    <div class="col-md-4 col-sm-8 mt-2 mt-sm-0">
+    <div class="col-6 col-md-4">
+
       <input type="number" class="form-control form-control-sm" id="price-${isin}" placeholder="Prezzo unitario (€)" step="0.01" />
     </div>
-    <div class="col-md-2 col-sm-4 mt-2 mt-sm-0">
+    <div class="col-6 col-md-2">
+
       <button class="btn btn-sm btn-primary w-100" type="button" id="confirm-${isin}">Conferma</button>
     </div>
   `;

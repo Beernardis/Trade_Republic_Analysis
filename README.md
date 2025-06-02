@@ -37,4 +37,3 @@ Tutto avviene direttamente nel tuo browser, in locale. Sei l’unico a vedere i 
 
 Creato da **Beernardis**  
 GitHub: [github.com/Beernardis](https://github.com/Beernardis)
-
